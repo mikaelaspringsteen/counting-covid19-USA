@@ -1,0 +1,12 @@
+name: counting-covid19-USA
+title: counting-covid19-USA
+username:
+account: mspringsteen
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2082165
+bundleId: 2988091
+url: https://mspringsteen.shinyapps.io/counting-covid19-USA/
+when: 1586370854.92641
+asMultiple: FALSE
+asStatic: FALSE
