@@ -22,7 +22,7 @@ if(!require(rintrojs)) install.packages("rintrojs", repos = "http://cran.us.r-pr
 if(!require(scales)) install.packages("scales", repos = "http://cran.us.r-project.org")
 
 # update data to be used
-# source("jhu_data.R")
+#source("jhu_data.R")
 
 # import data
 covid_cases <- read.csv("covid_cases_usa.csv")
@@ -35,7 +35,7 @@ ui <- dashboardPage(
   # header
   dashboardHeader(title = "Counting Covid-19: US States", titleWidth = 300,
                   
-                  tags$li(a(tags$i("*compare national infection rates here*"), href = "https://mspringsteen.shinyapps.io/counting-covid19/"), class = "dropdown"),
+                  tags$li(a(tags$i("*compare international infection rates here*"), href = "https://mspringsteen.shinyapps.io/counting-covid19/"), class = "dropdown"),
                   dropdownMenu(type = "notifications", 
                     icon = icon("question"), 
                     badgeStatus = NULL,
@@ -252,7 +252,7 @@ ui <- dashboardPage(
                tags$br(),
                tags$br(),
                tags$br(),
-               fluidRow(column(12, helpText("The grey line represents the conditional mean for all states, and the blue represents the mean for the highlighted states To interpret the number of cases and tests, raise 10 to the power of number displayed on the line (10 ^ that number).", tags$br(), "As more people are tested, the number of confimed cases increases. States who test a lot of people have more accurate rates of confirmed infection and case fatality.", tags$br(), "States with low testing and high case rates (toward the top left of the graph) likely have a large number of undetected cases in their population. States with high testing and low case rates (toward the bottom right of the graph) may be successfully containing the virus or, alternatively, may not be finding all of their positive cases.")))
+               fluidRow(column(12, helpText("The grey line represents the conditional mean for all states, and the blue represents the mean for the highlighted states. To interpret the number of cases and tests, raise 10 to the power of number displayed on the line (10 ^ that number).", tags$br(), "As more people are tested, the number of confimed cases increases. States who test a lot of people have more accurate rates of confirmed infection and case fatality.", tags$br(), "States with low testing and high case rates (toward the top left of the graph) likely have a large number of undetected cases in their population. States with high testing and low case rates (toward the bottom right of the graph) may be successfully containing the virus or, alternatively, may not be finding all of their positive cases.")))
       ),
       tabPanel("Cases",
                fluidRow(column(12, uiOutput("cases_graph"))),
@@ -267,7 +267,7 @@ ui <- dashboardPage(
                tags$br(),
                tags$br(),
                tags$br(),
-               fluidRow(column(12, helpText("The grey dotted line represents the conditional mean for all states, and the blue dotted line represents the mean for the highlighted states To interpret the number of cases, raise 10 to the power of number displayed on the line (10 ^ that number). The light band around these lines represents the standard error.", tags$br(),"This number has been scaled to represent the number of confirmed cases for every 100,000 people in each state, in order to make comparison betweeen states easier.", tags$br(), "If a state is not testing a lot of people, this number is probably lower than that state's actual infection rate, as a large number of mild cases may go undetected.")))
+               fluidRow(column(12, helpText("The grey dotted line represents the conditional mean for all states, and the blue dotted line represents the mean for the highlighted states. To interpret the number of cases, raise 10 to the power of number displayed on the line (10 ^ that number). The light band around these lines represents the standard error.", tags$br(),"This number has been scaled to represent the number of confirmed cases for every 100,000 people in each state, in order to make comparison betweeen states easier.", tags$br(), "If a state is not testing a lot of people, this number is probably lower than that state's actual infection rate, as a large number of mild cases may go undetected.")))
       ),
       tabPanel("Deaths",
                fluidRow(column(12, uiOutput("case_fatality_graph"))),
@@ -282,7 +282,7 @@ ui <- dashboardPage(
                tags$br(),
                tags$br(),
                tags$br(),
-               fluidRow(column(12, helpText("The grey dotted line represents the conditional mean for all states, and the blue dotted line represents the mean for the highlighted states To interpret the death rate, raise 10 to the power of number displayed on the line (10 ^ that number). The light band around these lines represents the standard error.", tags$br(),"Also known as the 'case fatality rate', this number is calculated by dividing the number of detected cases by the number of reported deaths.", tags$br(), "If a state is not testing a lot of people this number may be artifically high, as a large number of mild cases could go undetected. Confirmed cases may then represent the most severe cases—which are more likely to result in a death. If a state is not accurately recording Covid-19 deaths the case fatality rate may be artificially low for that state")))
+               fluidRow(column(12, helpText("The grey dotted line represents the conditional mean for all states, and the blue dotted line represents the mean for the highlighted states. To interpret the death rate, raise 10 to the power of number displayed on the line (10 ^ that number). The light band around these lines represents the standard error.", tags$br(),"Also known as the 'case fatality rate', this number is calculated by dividing the number of detected cases by the number of reported deaths.", tags$br(), "If a state is not testing a lot of people this number may be artifically high, as a large number of mild cases could go undetected. Confirmed cases may then represent the most severe cases—which are more likely to result in a death. If a state is not accurately recording Covid-19 deaths the case fatality rate may be artificially low for that state")))
       )
     )
     )
