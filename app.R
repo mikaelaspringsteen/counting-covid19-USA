@@ -29,20 +29,19 @@ covid_cases <- read.csv("covid_cases_usa.csv")
 covid_cases$Cases <- covid_cases$Totalper100_000
 covid_cases$Tests <- covid_cases$atlTestsper100_000
 
-
 # Shiny ui
 ui <- dashboardPage(
   # header
   dashboardHeader(title = "Counting Covid-19: US States", titleWidth = 300,
-                  
+
                   tags$li(a(tags$i("*compare infection rates for other regions here*"), href = "https://mikaelaspringsteen.github.io/countingcovid19/"), class = "dropdown"),
-                  dropdownMenu(type = "notifications", 
-                    icon = icon("question"), 
+                  dropdownMenu(type = "notifications",
+                    icon = icon("question"),
                     badgeStatus = NULL,
-                    headerText = tags$i("Questions? Suggestions? Want to request", tags$br(), 
+                    headerText = tags$i("Questions? Suggestions? Want to request", tags$br(),
                                         "a stat be added to the app? Get in touch at", tags$br(),
                                         "contactmspringsteen@gmail.com")),
-                  tags$li(a("ABOUT THIS APP", href = "https://github.com/mikaelaspringsteen/counting-covid19-USA"), class = "dropdown")),
+                  tags$li(a("ABOUT THIS APP", href = "https://github.com/mikaelaspringsteen/counting-covid19-USA/blob/master/README.md"), class = "dropdown")),
   # sidebar
   dashboardSidebar(
     useShinyjs(),
@@ -53,7 +52,7 @@ ui <- dashboardPage(
     h5("several to visualize their impact on" , align = "center"),
     h5("tracking the spread of the virus.", align = "center"),
     tags$hr(),
-    introBox(data.step = 3, data.intro = "Click here to update graphs with your selections.",
+    introBox(data.step = 3, data.intro = "Click here to update graphs with your selections or to reset any highlights set from the controls to the right of the graph.",
     fluidRow(
       column(1, offset = 3,
       actionButton("updategraph", tags$b("Update graph"))
@@ -62,13 +61,13 @@ ui <- dashboardPage(
     ),
     introBox(data.step = 2, data.intro = "Selecting variables here will highlight any states on the graph which match those characteristics.",
     sidebarMenu(
-      introBox(data.step = 1, data.intro = "In most cases, you should include all states. To isolate the course of the virus in specific states, double click on the state name to the right of the graphs. Otherwise, if you have reason to restrict your exploration to certain states, you may do so here.",
+      introBox(data.step = 1, data.intro = "Select states here. You may also isolate the course of the virus in specific states by double clicking on the state name to the right of the graph.",
       uiOutput("states")
       ),
       menuItem("Population statistics", tabName = "populationstatistics",
                checkboxInput(
-                 inputId = "popcheck", 
-                 label = "Population (in hundred thousands)", 
+                 inputId = "popcheck",
+                 label = "Population (in hundred thousands)",
                  value = FALSE
                  ),
                sliderInput(
@@ -80,8 +79,8 @@ ui <- dashboardPage(
                  step = 5
                  ),
                checkboxInput(
-                 inputId = "popdenscheck", 
-                 label = "Population density (per square mile)", 
+                 inputId = "popdenscheck",
+                 label = "Population density (per square mile)",
                  value = FALSE
                ),
                sliderInput(
@@ -93,8 +92,8 @@ ui <- dashboardPage(
                  step = 5
                ),
                checkboxInput(
-                 inputId = "agecheck", 
-                 label = "% of population aged 65+", 
+                 inputId = "agecheck",
+                 label = "% of population aged 65+",
                  value = FALSE
                ),
                sliderInput(
@@ -106,8 +105,8 @@ ui <- dashboardPage(
                  step = 1
                ),
                checkboxInput(
-                 inputId = "hscheck", 
-                 label = "% of population with at least a high school education", 
+                 inputId = "hscheck",
+                 label = "% of population with at least a high school education",
                  value = FALSE
                ),
                sliderInput(
@@ -119,8 +118,8 @@ ui <- dashboardPage(
                  step = 1
                ),
                checkboxInput(
-                 inputId = "bacheck", 
-                 label = "% of population with at least an undergraduate education", 
+                 inputId = "bacheck",
+                 label = "% of population with at least an undergraduate education",
                  value = FALSE
                ),
                sliderInput(
@@ -132,8 +131,8 @@ ui <- dashboardPage(
                  step = 1
                ),
                checkboxInput(
-                 inputId = "commutecheck", 
-                 label = "Average commute time (in minutes)", 
+                 inputId = "commutecheck",
+                 label = "Average commute time (in minutes)",
                  value = FALSE
                ),
                sliderInput(
@@ -147,8 +146,8 @@ ui <- dashboardPage(
       ),
       menuItem("Economic statistics", tabName = "economicstatistics",
                checkboxInput(
-                 inputId = "incomecheck", 
-                 label = "Income ($ per capita)", 
+                 inputId = "incomecheck",
+                 label = "Income ($ per capita)",
                  value = FALSE
                ),
                sliderInput(
@@ -160,8 +159,8 @@ ui <- dashboardPage(
                  step = 100
                ),
                checkboxInput(
-                 inputId = "povertycheck", 
-                 label = "% of population below the poverty line", 
+                 inputId = "povertycheck",
+                 label = "% of population below the poverty line",
                  value = FALSE
                ),
                sliderInput(
@@ -173,8 +172,8 @@ ui <- dashboardPage(
                  step = 1
                ),
                checkboxInput(
-                 inputId = "homecheck", 
-                 label = "% of population who own their own home", 
+                 inputId = "homecheck",
+                 label = "% of population who own their own home",
                  value = FALSE
                ),
                sliderInput(
@@ -186,8 +185,8 @@ ui <- dashboardPage(
                  step = 1
                ),
                checkboxInput(
-                 inputId = "homepersonscheck", 
-                 label = "Number of people living in a single home", 
+                 inputId = "homepersonscheck",
+                 label = "Number of people living in a single home",
                  value = FALSE
                ),
                sliderInput(
@@ -199,8 +198,8 @@ ui <- dashboardPage(
                  step = 1
                ),
                checkboxInput(
-                 inputId = "rentcheck", 
-                 label = "Rent (median gross $)", 
+                 inputId = "rentcheck",
+                 label = "Rent (median gross $)",
                  value = FALSE
                ),
                sliderInput(
@@ -214,8 +213,8 @@ ui <- dashboardPage(
       ),
       menuItem("Health statistics", tabName = "healthstatistics",
                checkboxInput(
-                 inputId = "insurancecheck", 
-                 label = "% of under 65 population with no health insurance", 
+                 inputId = "insurancecheck",
+                 label = "% of under 65 population with no health insurance",
                  value = FALSE
                ),
                sliderInput(
@@ -235,7 +234,7 @@ ui <- dashboardPage(
     tags$head(
       tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
     ),
-    introBox(data.step = 4, data.intro = "Switch between tabs to see different Covid-19 metrics. A description of the graph is located below each panel.",
+    introBox(data.step = 4, data.intro = "Switch between tabs to see different Covid-19 metrics. A description of the graph is located below each panel. Points represent policies enacted at the state level.",
     tabsetPanel(
       tabPanel("Tests",
                introBox(data.step = 5, data.intro = "Each graph is interactive. Hover over points/lines for more information, or find more settings (including a home button to reset axes) at the top right of each graph.",
@@ -252,7 +251,7 @@ ui <- dashboardPage(
                tags$br(),
                tags$br(),
                tags$br(),
-               fluidRow(column(12, helpText("The grey line represents the conditional mean for all states, and the blue represents the mean for the highlighted states. To interpret the number of cases and tests, raise 10 to the number displayed when hovering over the line (10 ^ that number).", tags$br(), "As more people are tested, the number of confimed cases increases. States who test a lot of people have more accurate rates of confirmed infection and case fatality.", tags$br(), "States with low testing and high case rates (toward the top left of the graph) likely have a large number of undetected cases in their population. States with high testing and low case rates (toward the bottom right of the graph) may be successfully containing the virus or, alternatively, may not be finding all of their positive cases.")))
+               fluidRow(column(12, helpText("The grey dotted line represents the conditional mean for all states. The blue represents the mean for the highlighted states. The light band represents standard error.", tags$br(), "Low testing and high case rates (toward the top left of the graph) may indicate the presence of a large number of undetected cases. High testing and low case rates (toward the bottom right of the graph) may indicate the virus is being successfully contained or that a state may not be finding all positive cases.")))
       ),
       tabPanel("Cases",
                fluidRow(column(12, uiOutput("cases_graph"))),
@@ -267,7 +266,7 @@ ui <- dashboardPage(
                tags$br(),
                tags$br(),
                tags$br(),
-               fluidRow(column(12, helpText("The grey dotted line represents the conditional mean for all states, and the blue dotted line represents the mean for the highlighted states. To interpret the number of cases, raise 10 to the number displayed when hovering over the line (10 ^ that number). The light band around these lines represents the standard error.", tags$br(),"This number has been scaled to represent the number of confirmed cases for every 100,000 people in each state, in order simplify comparison betweeen states.", tags$br(), "If a state is not testing many people, this number is probably lower than that state's actual infection rate, as a large number of mild cases may go undetected.")))
+               fluidRow(column(12, helpText("The grey dotted line represents the conditional mean for all states. The blue represents the mean for the highlighted states. The light bands represent standard error.", tags$br(),"Cases have been scaled to represent the number of confirmed cases for every 100,000 people in each state, to simplify comparison betweeen states.", tags$br(), "If a state is not testing many people, this number is probably lower than that state's actual infection rate as mild cases go undetected.")))
       ),
       tabPanel("Deaths",
                fluidRow(column(12, uiOutput("case_fatality_graph"))),
@@ -282,7 +281,7 @@ ui <- dashboardPage(
                tags$br(),
                tags$br(),
                tags$br(),
-               fluidRow(column(12, helpText("The grey dotted line represents the conditional mean for all states, and the blue dotted line represents the mean for the highlighted states. To interpret the death rate, raise 10 to the number displayed when hovering over the line (10 ^ that number). The light band around these lines represents the standard error.", tags$br(),"Also known as the 'case fatality rate', this number is calculated by dividing the number of detected cases by the number of reported deaths.", tags$br(), "If a state is not testing many people this number may be artifically high, as a large number of mild cases could go undetected. Confirmed cases may therefore represent the most severe cases—which are more likely to result in a death. If a state is not accurately recording Covid-19 deaths the case fatality rate may be artificially low for that state.")))
+               fluidRow(column(12, helpText("The grey dotted line represents the conditional mean for all states. The blue represents the mean for the highlighted states. The light bands represent standard error.", tags$br(), "Also known as the 'case fatality rate' (or CFR), this number is calculated by dividing the number of detected cases by the number of reported deaths.", tags$br(), "If a state is not testing many people the CFR may be artifically high as mild cases go undetected. Inaccurately recording Covid-19 deaths may result in an artificially low CFR.")))
       )
     )
     )
@@ -296,6 +295,9 @@ server <- function(input, output, session) {
     showModal(modalDialog(
       easyClose = TRUE,
       title = tags$b("Counting Covid-19: US States"),
+      tags$b(tags$i("Please note: this app is based on a large dataset, and the graphs may take some time to load.")),
+      tags$br(),
+      tags$hr(),
       tags$b("What we know about the infection or death rate of Covid-19 depends on one thing:"),
       tags$br(),
       tags$b("how good are states at counting the people who have Covid-19?"),
@@ -308,9 +310,6 @@ server <- function(input, output, session) {
       tags$br(),
       tags$br(),
       tags$b("Exploring what characteristics are associated with increased testing, lower case rates, or lower case fatality rates might help explain what makes some states better at counting cases of Covid-19 than others."),
-      tags$br(),
-      tags$hr(),
-      tags$b(tags$i("Please note: this app is based on a large dataset, and the graphs may take some time to load.")),
       tags$br(),
       tags$hr(),
       tags$i("For information about combating the spread of the virus, or about symptoms and treatment, there are a number of excellent resources run by infectious disease experts and medical professionals, including the ", tags$a(href = "https://www.who.int/emergencies/diseases/novel-coronavirus-2019", "WHO"), "and ", tags$a(href = "https://www.cdc.gov/coronavirus/2019-nCoV/index.html", "CDC"), "for public health information, the ", tags$a(href = "https://www.nih.gov/health-information/coronavirus", "NIH"), "and ", tags$a(href = "https://www.gisaid.org/", "GISAID"), "for research information, and ", tags$a(href = "https://gisanddata.maps.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6", "JHU"), "for data."),
@@ -336,16 +335,16 @@ server <- function(input, output, session) {
   output$states <- renderUI({
     stateslist <- unique(as.character(covid_cases$State))
     pickerInput(
-      inputId = "statesinput", label = h5("Select states to include in plot"), 
-      choices = stateslist, 
+      inputId = "statesinput", label = h5("Select states to include in plot"),
+      choices = stateslist,
       selected = stateslist,
-      multiple = TRUE, 
+      multiple = TRUE,
       options = list(`actions-box` = TRUE)
     )
   })
   # create minimal dataset
   min_covid_case <- reactive({
-    select(covid_cases, State, Date, Day, Tests, Cases, DeathRate) %>%
+    select(covid_cases, State, Date, Day, Tests, Cases, DeathRate, Measure) %>%
       filter(State %in% input$statesinput)
   })
   # enable inputs if variable is checked
@@ -665,7 +664,7 @@ server <- function(input, output, session) {
     popdensfilter <- quote(between(Pop_psqMile, as.numeric(input$popdensinput[1]), as.numeric(input$popdensinput[2])))
     covid_cases %>%
       select(
-        State, Date, Day, Tests, Cases, DeathRate,
+        State, Date, Day, Tests, Cases, DeathRate, Measure,
         if (input$popcheck == FALSE) {"State"} else {"Population_hundthou"},
         if (input$agecheck == FALSE) {"State"} else {"Age"},
         if (input$hscheck == FALSE) {"State"} else {"HSgrad"},
@@ -703,12 +702,14 @@ server <- function(input, output, session) {
       need(try(select(selected_covid_case(), State) != ""), "There are no states matching the selected criteria.\nPlease select fewer variables, adjust the range of those already selected, or add additional states from the dropdown to the left."))
     validate(
       need(try(select(selected_covid_case(), Tests) != ""), "That state has no testing data available."))
-    plot <- 
+    plot <-
       with_options(list(digits = 1),
       ggplotly(
         ggplot(selected_covid_case()) +
-          geom_line(data = min_covid_case(), aes(x = Tests, y = Cases, group = State), color = "#bdc3c7", show.legend = FALSE) +
-          geom_line(aes(x = Tests, y = Cases, color = State), show.legend = FALSE) +
+          geom_line(data = min_covid_case(), aes(x = Tests, y = Cases, group = State,
+                                                 text = paste(State, "<br>Day: ", Day, "<br> Tests: ", round(Tests, digits = 1), "<br>Cases: ", round(Cases, digits = 1))), color = "#bdc3c7", show.legend = FALSE) +
+          geom_line(aes(x = Tests, y = Cases, color = State, group = State,
+                        text = paste(State, "<br>Day: ", Day, "<br> Tests: ", round(Tests, digits = 1), "<br>Cases: ", round(Cases, digits = 1))), show.legend = FALSE) +
           geom_smooth(aes(x = Tests, y = Cases), data = min_covid_case(),
                       method = "loess", se = FALSE, color = "#bdc3c7", size = .5, alpha = .6, linetype = "dotted") +
           geom_ribbon(aes(x = Tests, y = Cases), data = min_covid_case(),
@@ -720,7 +721,7 @@ server <- function(input, output, session) {
           scale_x_log10(expand = c(0, 0)) +
           scale_y_log10(expand = c(0, 0)) +
           labs(
-            title = "How is the rate of testing related to the confirmed rate of infection?",
+            title = "Covid-19 testing by confirmed infections",
             x = "Tests performed per 100,000 people", y = "Confirmed Covid-19 cases per 100,000 people") +
           theme(text = element_text(family = "Georgia"),
                 panel.background = element_rect(fill = "#f7f5f0", colour = "#f7f5f0"),
@@ -728,21 +729,25 @@ server <- function(input, output, session) {
                 plot.subtitle = element_text(face = "italic"),
                 axis.title = element_text(face = "italic"),
                 plot.caption = element_text(face = "italic"),
-                panel.grid.major = element_line(colour = "#D5D3CC", size = rel(.5)), 
+                panel.grid.major = element_line(colour = "#D5D3CC", size = rel(.5)),
                 panel.grid.major.x = element_blank(),
-                panel.grid.minor = element_blank(), 
+                panel.grid.minor = element_blank(),
                 axis.ticks = element_blank(),
                 axis.text.x = NULL,
                 axis.line.x = element_line(colour = "#908f85"),
                 plot.margin = unit(c(2, 1, 2, 1), "lines")),
-        height = 600
+        height = 600,
+        tooltip = "text"
       )
       )
   })
   output$tests_plot <- renderPlotly({
     input$updategraph
     isolate({
-      tests_plot()
+      tests_plot() %>% add_trace(data = subset(selected_covid_case(), !is.na(Measure)), y = ~log10(Cases), x = ~log10(Tests),
+                                 text = ~paste(State, "<br>Day: ", Day, "<br>Tests: ", round(Tests, digits = 1), "<br>Cases: ", round(Cases, digits = 1), "<br>Policies enacted today: ", "<br>", Measure),
+                                 color = I("#575D61"), mode = "markers", alpha = .7, marker = list(size = 7), showlegend = FALSE,
+                                 hovertemplate = "%{text}<extra></extra>")
     })
   })
   output$tests_graph <- renderUI({
@@ -758,12 +763,14 @@ server <- function(input, output, session) {
       need(input$statesinput != "", "Please select at least 1 state from the dropdown to the left."))
     validate(
       need(try(select(selected_covid_case(), State) != ""), "There are no states matching the selected criteria.\nPlease select fewer variables, adjust the range of those already selected, or add additional states from the dropdown to the left."))
-    plot <- 
+    plot <-
       with_options(list(digits = 1),
       ggplotly(
       ggplot(selected_covid_case()) +
-      geom_line(data = min_covid_case(), aes(x = Day, y = Cases, group = State), color = "#bdc3c7", show.legend = FALSE) +
-      geom_line(aes(x = Day, y = Cases, color = State, group = State), show.legend = FALSE) +
+      geom_line(data = min_covid_case(), aes(x = Day, y = Cases, group = State,
+                                             text = paste(State, "<br>Day: ", Day, "<br>Cases: ", round(Cases, digits = 1))), color = "#bdc3c7", show.legend = FALSE) +
+      geom_line(aes(x = Day, y = Cases, color = State, group = State,
+                    text = paste(State, "<br>Day: ", Day, "<br>Cases: ", round(Cases, digits = 1))), show.legend = FALSE) +
       geom_smooth(aes(x = Day, y = Cases), data = min_covid_case(),
         method = "loess", se = FALSE, color = "#bdc3c7", size = .5, alpha = .6, linetype = "dotted") +
       geom_ribbon(aes(x = Day, y = Cases), data = min_covid_case(),
@@ -773,7 +780,7 @@ server <- function(input, output, session) {
       geom_ribbon(aes(x = Day, y = Cases),
         stat = "smooth", method = "loess", alpha = .15) +
       labs(
-        title = "How many people, that we know of, have Covid-19?",
+        title = "Confirmed Covid-19 cases",
         x = "Days from 50th in-state case", y = "Detected cases per 100,000 people") +
       scale_x_continuous(expand = c(0, 0)) +
       scale_y_log10(expand = c(0, 0)) +
@@ -783,22 +790,25 @@ server <- function(input, output, session) {
         plot.subtitle = element_text(face = "italic"),
         axis.title = element_text(face = "italic"),
         plot.caption = element_text(face = "italic"),
-        panel.grid.major = element_line(colour = "#D5D3CC", size = rel(.5)), 
+        panel.grid.major = element_line(colour = "#D5D3CC", size = rel(.5)),
         panel.grid.major.x = element_blank(),
-        panel.grid.minor = element_blank(), 
+        panel.grid.minor = element_blank(),
         axis.ticks = element_blank(),
         axis.text.x = NULL,
         axis.line.x = element_line(colour = "#908f85"),
         plot.margin = unit(c(2, 1, 2, 1), "lines")),
       height = 600,
-      tooltip = c("text", "x", "y", "group")
+      tooltip = "text"
       )
       )
   })
   output$cases_plot <- renderPlotly({
     input$updategraph
     isolate({
-      cases_plot()
+      cases_plot() %>% add_trace(data = subset(selected_covid_case(), !is.na(Measure)), y = ~log10(Cases), x = ~Day,
+                                 text = ~paste(State, "<br>Day: ", Day, "<br>Cases: ", round(Cases, digits = 1), "<br>Policies enacted today: ", "<br>", Measure),
+                                 color = I("#575D61"), mode = "markers", alpha = .7, marker = list(size = 7), showlegend = FALSE,
+                                 hovertemplate = "%{text}<extra></extra>")
     })
   })
   output$cases_graph <- renderUI({
@@ -814,12 +824,14 @@ server <- function(input, output, session) {
       need(input$statesinput != "", "Please select at least 1 state from the dropdown to the left."))
     validate(
       need(try(select(selected_covid_case(), State) != ""), "There are no states matching the selected criteria.\nPlease select fewer variables, adjust the range of those already selected, or add additional states from the dropdown to the left."))
-    plot <- 
+    plot <-
       with_options(list(digits = 1),
       ggplotly(
       ggplot(selected_covid_case()) +
-      geom_line(data = min_covid_case(), aes(x = Day, y = DeathRate, group = State), color = "#bdc3c7", show.legend = FALSE) +
-      geom_line(aes(x = Day, y = DeathRate, color = State), show.legend = FALSE) +
+      geom_line(data = min_covid_case(), aes(x = Day, y = DeathRate, group = State,
+                                             text = paste(State, "<br>Day: ", Day, "<br>Death Rate: ", paste(round(100*DeathRate, 2), "%", sep = ""))), color = "#bdc3c7", show.legend = FALSE) +
+      geom_line(aes(x = Day, y = DeathRate, color = State, group = State,
+                    text = paste(State, "<br>Day: ", Day, "<br>Death Rate: ", paste(round(100*DeathRate, 2), "%", sep = ""))), show.legend = FALSE) +
       geom_smooth(aes(x = Day, y = DeathRate), data = min_covid_case(),
                     method = "loess", se = FALSE, color = "#bdc3c7", size = .5, alpha = .6, linetype = "dotted") +
       geom_ribbon(aes(x = Day, y = DeathRate), data = min_covid_case(),
@@ -829,32 +841,36 @@ server <- function(input, output, session) {
       geom_ribbon(aes(x = Day, y = DeathRate),
                     stat = "smooth", method = "loess", alpha = .15) +
       labs(
-        title = list(text = paste0("Of the people that we know have Covid-19, what percent have died?", "<br>", "<sup>",
+        title = list(text = paste0("Reported Covid-19 death rate", "<br>", "<sup>",
                                    "","<sup>")),
         x = "Days from 50th in-state case", y = "Percent of detected cases resulting in a death") +
       scale_x_continuous(expand = c(0, 0)) +
-      scale_y_continuous(expand = c(0, 0), breaks = c(.001, .01, .05, .1, .15), labels = scales::percent) +
+      scale_y_continuous(expand = c(0, 0), breaks = c(.01, .05, .1, .15), limits = c(0, .17), labels = scales::percent) +
       theme(text = element_text(family = "Georgia"),
             panel.background = element_rect(fill = "#f7f5f0", colour = "#f7f5f0"),
             plot.title = element_text(face = "italic"),
             plot.subtitle = element_text(face = "italic"),
             axis.title = element_text(face = "italic"),
             plot.caption = element_text(face = "italic"),
-            panel.grid.major = element_line(colour = "#D5D3CC", size = rel(.5)), 
+            panel.grid.major = element_line(colour = "#D5D3CC", size = rel(.5)),
             panel.grid.major.x = element_blank(),
-            panel.grid.minor = element_blank(), 
+            panel.grid.minor = element_blank(),
             axis.ticks = element_blank(),
             axis.text.x = NULL,
             axis.line.x = element_line(colour = "#908f85"),
             plot.margin = unit(c(2, 1, 2, 1), "lines")),
-      height = 600
+      height = 600,
+      tooltip = "text"
       )
       )
   })
   output$case_fatality_plot <- renderPlotly({
     input$updategraph
     isolate({
-      case_fatality_plot()
+      case_fatality_plot() %>% add_trace(data = subset(selected_covid_case(), !is.na(Measure)), y = ~DeathRate, x = ~Day,
+                                         text = ~paste(State, "<br>Day: ", Day, "<br>Death Rate: ", paste(round(100*DeathRate, 2), "%", sep = ""),  "<br>Policies enacted today: ", "<br>", Measure),
+                                         color = I("#575D61"), mode = "markers", alpha = .7, marker = list(size = 7), showlegend = FALSE,
+                                         hovertemplate = "%{text}<extra></extra>")
     })
   })
   output$case_fatality_graph <- renderUI({
@@ -864,7 +880,7 @@ server <- function(input, output, session) {
       color = "#3c8dbc"
     )
   })
-  
+
 }
 
 # Shiny app
