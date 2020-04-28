@@ -16,7 +16,7 @@ The app is updated daily to reflect changes to the underlying data.
 
 ## Data
 
-COVID-19 metrics are drawn from the [Johns Hopkins CSSE COVID-19 repository](https://github.com/CSSEGISandData). Testing data is from [The COVID Tracking Project](https://covidtracking.com/). Data detailing policy actions taken is from the [CoronaNet Project](https://github.com/saudiwin/corona_tscs/tree/master/data). Statistics describing the 50 states, plus Puerto Rico, were compiled from the [US Census Bureau](https://www.census.gov/quickfacts/fact/table/US/PST045219). Data for Guam, the Northern Mariana Islands, and the US Virgin Islands is from:
+COVID-19 metrics are drawn from the [Johns Hopkins CSSE COVID-19 repository](https://github.com/CSSEGISandData). Testing data is from [The COVID Tracking Project](https://covidtracking.com/). Data detailing policy actions taken is from the [CoronaNet Project](https://coronanet-project.org/index.html). Statistics describing the 50 states, plus Puerto Rico, were compiled from the [US Census Bureau](https://www.census.gov/quickfacts/fact/table/US/PST045219). Data for Guam, the Northern Mariana Islands, and the US Virgin Islands is from:
 - the [CIA World Factbook](https://www.worldbank.org/): for population, percent of population aged 65+, and poverty data
 - [Wikipedia](https://en.wikipedia.org/wiki/Main_Page): for population density data
 
