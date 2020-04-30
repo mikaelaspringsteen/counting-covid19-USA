@@ -27,7 +27,10 @@ if(!require(scales)) install.packages("scales", repos = "http://cran.us.r-projec
 # import data
 covid_cases <- read.csv("covid_cases_usa.csv")
 covid_cases$Cases <- covid_cases$Totalper100_000
+covid_cases$Cases_actual <- (covid_cases$Cases/100000)*covid_cases$Population
 covid_cases$Tests <- covid_cases$atlTestsper100_000
+covid_cases$Tests_actual <- (covid_cases$Tests/100000)*covid_cases$Population
+covid_cases$NewCases_actual <- (covid_cases$NewCases/100000)*covid_cases$Population
 
 # Shiny ui
 ui <- dashboardPage(
@@ -236,10 +239,25 @@ ui <- dashboardPage(
     ),
     introBox(data.step = 4, data.intro = "Switch between tabs to see different Covid-19 metrics. A description of the graph is located below each panel. Points represent policies enacted at the state level.",
     tabsetPanel(
-      tabPanel("Tests",
+      tabPanel("New Cases",
                introBox(data.step = 5, data.intro = "Each graph is interactive. Hover over points/lines for more information, or find more settings (including a home button to reset axes) at the top right of each graph.",
-               fluidRow(column(12, uiOutput("tests_graph")))
+                        fluidRow(column(12, uiOutput("newcases_graph")))
                ),
+               tags$br(),
+               tags$br(),
+               tags$br(),
+               tags$br(),
+               tags$br(),
+               tags$br(),
+               tags$br(),
+               tags$br(),
+               tags$br(),
+               tags$br(),
+               tags$br(),
+               fluidRow(column(12, helpText("The grey dotted line represents the conditional mean for all states. The blue represents the mean for the highlighted states. The light bands represent standard error.", tags$br(),"Cases have been scaled to represent the number of confirmed cases for every 100,000 people in each state, to simplify comparison betweeen states.", tags$br(), "If a state is not testing many people, this number is probably lower than that state's actual infection rate as mild cases go undetected.")))
+      ),
+      tabPanel("Testing",
+               fluidRow(column(12, uiOutput("tests_graph"))),
                tags$br(),
                tags$br(),
                tags$br(),
@@ -253,7 +271,7 @@ ui <- dashboardPage(
                tags$br(),
                fluidRow(column(12, helpText("The grey dotted line represents the conditional mean for all states. The blue represents the mean for the highlighted states. The light band represents standard error.", tags$br(), "Low testing and high case rates (toward the top left of the graph) may indicate the presence of a large number of undetected cases. High testing and low case rates (toward the bottom right of the graph) may indicate the virus is being successfully contained or that a state may not be finding all positive cases.")))
       ),
-      tabPanel("Cases",
+      tabPanel("Total Cases",
                fluidRow(column(12, uiOutput("cases_graph"))),
                tags$br(),
                tags$br(),
@@ -268,7 +286,7 @@ ui <- dashboardPage(
                tags$br(),
                fluidRow(column(12, helpText("The grey dotted line represents the conditional mean for all states. The blue represents the mean for the highlighted states. The light bands represent standard error.", tags$br(),"Cases have been scaled to represent the number of confirmed cases for every 100,000 people in each state, to simplify comparison betweeen states.", tags$br(), "If a state is not testing many people, this number is probably lower than that state's actual infection rate as mild cases go undetected.")))
       ),
-      tabPanel("Deaths",
+      tabPanel("Death Rate",
                fluidRow(column(12, uiOutput("case_fatality_graph"))),
                tags$br(),
                tags$br(),
@@ -344,7 +362,7 @@ server <- function(input, output, session) {
   })
   # create minimal dataset
   min_covid_case <- reactive({
-    select(covid_cases, State, Date, Day, Tests, Cases, DeathRate, Measure) %>%
+    select(covid_cases, State, Date, Day, Tests, Cases, DeathRate, Measure, NewCases, Cases_actual, Tests_actual, NewCases_actual) %>%
       filter(State %in% input$statesinput)
   })
   # enable inputs if variable is checked
@@ -664,7 +682,7 @@ server <- function(input, output, session) {
     popdensfilter <- quote(between(Pop_psqMile, as.numeric(input$popdensinput[1]), as.numeric(input$popdensinput[2])))
     covid_cases %>%
       select(
-        State, Date, Day, Tests, Cases, DeathRate, Measure,
+        State, Date, Day, Tests, Cases, DeathRate, Measure, NewCases, Cases_actual, Tests_actual, NewCases_actual,
         if (input$popcheck == FALSE) {"State"} else {"Population_hundthou"},
         if (input$agecheck == FALSE) {"State"} else {"Age"},
         if (input$hscheck == FALSE) {"State"} else {"HSgrad"},
@@ -694,6 +712,67 @@ server <- function(input, output, session) {
         if (input$popdenscheck == FALSE) {!is.na(State)} else {!!popdensfilter}
       )
   })
+  # new cases graph
+  newcases_plot <- reactive({
+    validate(
+      need(input$statesinput != "", "Please select at least 1 state from the dropdown to the left."))
+    validate(
+      need(try(select(selected_covid_case(), State) != ""), "There are no states matching the selected criteria.\nPlease select fewer variables, adjust the range of those already selected, or add additional states from the dropdown to the left."))
+    plot <-
+      with_options(list(digits = 1),
+                   ggplotly(
+                     ggplot(selected_covid_case()) +
+                       geom_line(data = min_covid_case(), aes(x = Day, y = NewCases, group = State,
+                                                              text = paste(State, "<br>Day: ", Day, "<br>New Cases (scaled): ", round(NewCases, digits = 1), "<br>New Cases (actual): ", round(NewCases_actual, digits = 1))), color = "#bdc3c7", show.legend = FALSE) +
+                       geom_line(aes(x = Day, y = NewCases, color = State, group = State,
+                                     text = paste(State, "<br>Day: ", Day, "<br>New Cases (scaled): ", round(NewCases, digits = 1), "<br>New Cases (actual): ", round(NewCases_actual, digits = 1))), show.legend = FALSE) +
+                       geom_smooth(aes(x = Day, y = NewCases), data = min_covid_case(),
+                                   method = "loess", se = FALSE, color = "#bdc3c7", size = .5, alpha = .6, linetype = "dotted") +
+                       geom_ribbon(aes(x = Day, y = NewCases), data = min_covid_case(),
+                                   stat = "smooth", method = "loess", alpha = .15) +
+                       geom_smooth(aes(x = Day, y = NewCases),
+                                   method = "loess", se = FALSE, color = "#3c8dbc", size = .5, alpha = .6, linetype = "dotted") +
+                       geom_ribbon(aes(x = Day, y = NewCases),
+                                   stat = "smooth", method = "loess", alpha = .15) +
+                       labs(
+                         title = "New confirmed Covid-19 cases ('The Curve')",
+                         x = "Days from 50th in-state case", y = "New cases per 100,000 people") +
+                       scale_x_continuous(expand = c(0, 0)) +
+                       scale_y_log10(expand = c(0, 0)) +
+                       theme(text = element_text(family = "Georgia"),
+                             panel.background = element_rect(fill = "#f7f5f0", colour = "#f7f5f0"),
+                             plot.title = element_text(face = "italic"),
+                             plot.subtitle = element_text(face = "italic"),
+                             axis.title = element_text(face = "italic"),
+                             plot.caption = element_text(face = "italic"),
+                             panel.grid.major = element_line(colour = "#D5D3CC", size = rel(.5)),
+                             panel.grid.major.x = element_blank(),
+                             panel.grid.minor = element_blank(),
+                             axis.ticks = element_blank(),
+                             axis.text.x = NULL,
+                             axis.line.x = element_line(colour = "#908f85"),
+                             plot.margin = unit(c(2, 1, 2, 1), "lines")),
+                     height = 600,
+                     tooltip = "text"
+                   )
+      )
+  })
+  output$newcases_plot <- renderPlotly({
+    input$updategraph
+    isolate({
+      newcases_plot() %>% add_trace(data = subset(selected_covid_case(), !is.na(Measure)), y = ~log10(NewCases), x = ~Day,
+                                 text = ~paste(State, "<br>Day: ", Day, "<br>New Cases (scaled): ", round(NewCases, digits = 1), "<br>New Cases (actual): ", round(NewCases_actual, digits = 1), "<br>Policies enacted today: ", "<br>", Measure),
+                                 color = I("#575D61"), mode = "markers", alpha = .7, marker = list(size = 7), showlegend = FALSE,
+                                 hovertemplate = "%{text}<extra></extra>")
+    })
+  })
+  output$newcases_graph <- renderUI({
+    withSpinner(
+      plotlyOutput("newcases_plot"),
+      type = 1,
+      color = "#3c8dbc"
+    )
+  })
   # tests graph
   tests_plot <- reactive({
     validate(
@@ -707,9 +786,9 @@ server <- function(input, output, session) {
       ggplotly(
         ggplot(selected_covid_case()) +
           geom_line(data = min_covid_case(), aes(x = Tests, y = Cases, group = State,
-                                                 text = paste(State, "<br>Day: ", Day, "<br> Tests: ", round(Tests, digits = 1), "<br>Cases: ", round(Cases, digits = 1))), color = "#bdc3c7", show.legend = FALSE) +
+                                                 text = paste(State, "<br>Day: ", Day, "<br>Tests (scaled): ", round(Tests, digits = 1), "<br>Tests (actual): ", round(Tests_actual, digits = 1), "<br>Cases (scaled): ", round(Cases, digits = 1), "<br>Cases (actual): ", round(Cases_actual, digits = 1))), color = "#bdc3c7", show.legend = FALSE) +
           geom_line(aes(x = Tests, y = Cases, color = State, group = State,
-                        text = paste(State, "<br>Day: ", Day, "<br> Tests: ", round(Tests, digits = 1), "<br>Cases: ", round(Cases, digits = 1))), show.legend = FALSE) +
+                        text = paste(State, "<br>Day: ", Day, "<br>Tests (scaled): ", round(Tests, digits = 1), "<br>Tests (actual): ", round(Tests_actual, digits = 1), "<br>Cases (scaled): ", round(Cases, digits = 1), "<br>Cases (actual): ", round(Cases_actual, digits = 1))), show.legend = FALSE) +
           geom_smooth(aes(x = Tests, y = Cases), data = min_covid_case(),
                       method = "loess", se = FALSE, color = "#bdc3c7", size = .5, alpha = .6, linetype = "dotted") +
           geom_ribbon(aes(x = Tests, y = Cases), data = min_covid_case(),
@@ -722,7 +801,7 @@ server <- function(input, output, session) {
           scale_y_log10(expand = c(0, 0)) +
           labs(
             title = "Covid-19 testing by confirmed infections",
-            x = "Tests performed per 100,000 people", y = "Confirmed Covid-19 cases per 100,000 people") +
+            x = "Tests performed per 100,000 people", y = "Detected cases per 100,000 people") +
           theme(text = element_text(family = "Georgia"),
                 panel.background = element_rect(fill = "#f7f5f0", colour = "#f7f5f0"),
                 plot.title = element_text(face = "italic"),
@@ -745,7 +824,7 @@ server <- function(input, output, session) {
     input$updategraph
     isolate({
       tests_plot() %>% add_trace(data = subset(selected_covid_case(), !is.na(Measure)), y = ~log10(Cases), x = ~log10(Tests),
-                                 text = ~paste(State, "<br>Day: ", Day, "<br>Tests: ", round(Tests, digits = 1), "<br>Cases: ", round(Cases, digits = 1), "<br>Policies enacted today: ", "<br>", Measure),
+                                 text = ~paste(State, "<br>Day: ", Day, "<br>Tests (scaled): ", round(Tests, digits = 1), "<br>Tests (actual): ", round(Tests_actual, digits = 1), "<br>Cases (scaled): ", round(Cases, digits = 1), "<br>Cases (actual): ", round(Cases_actual, digits = 1), "<br>Policies enacted today: ", "<br>", Measure),
                                  color = I("#575D61"), mode = "markers", alpha = .7, marker = list(size = 7), showlegend = FALSE,
                                  hovertemplate = "%{text}<extra></extra>")
     })
@@ -768,9 +847,9 @@ server <- function(input, output, session) {
       ggplotly(
       ggplot(selected_covid_case()) +
       geom_line(data = min_covid_case(), aes(x = Day, y = Cases, group = State,
-                                             text = paste(State, "<br>Day: ", Day, "<br>Cases: ", round(Cases, digits = 1))), color = "#bdc3c7", show.legend = FALSE) +
+                                             text = paste(State, "<br>Day: ", Day, "<br>Cases (scaled): ", round(Cases, digits = 1), "<br>Cases (actual): ", round(Cases_actual, digits = 1))), color = "#bdc3c7", show.legend = FALSE) +
       geom_line(aes(x = Day, y = Cases, color = State, group = State,
-                    text = paste(State, "<br>Day: ", Day, "<br>Cases: ", round(Cases, digits = 1))), show.legend = FALSE) +
+                    text = paste(State, "<br>Day: ", Day, "<br>Cases (scaled): ", round(Cases, digits = 1), "<br>Cases (actual): ", round(Cases_actual, digits = 1))), show.legend = FALSE) +
       geom_smooth(aes(x = Day, y = Cases), data = min_covid_case(),
         method = "loess", se = FALSE, color = "#bdc3c7", size = .5, alpha = .6, linetype = "dotted") +
       geom_ribbon(aes(x = Day, y = Cases), data = min_covid_case(),
@@ -806,7 +885,7 @@ server <- function(input, output, session) {
     input$updategraph
     isolate({
       cases_plot() %>% add_trace(data = subset(selected_covid_case(), !is.na(Measure)), y = ~log10(Cases), x = ~Day,
-                                 text = ~paste(State, "<br>Day: ", Day, "<br>Cases: ", round(Cases, digits = 1), "<br>Policies enacted today: ", "<br>", Measure),
+                                 text = ~paste(State, "<br>Day: ", Day, "<br>Cases (scaled): ", round(Cases, digits = 1), "<br>Cases (actual): ", round(Cases_actual, digits = 1), "<br>Policies enacted today: ", "<br>", Measure),
                                  color = I("#575D61"), mode = "markers", alpha = .7, marker = list(size = 7), showlegend = FALSE,
                                  hovertemplate = "%{text}<extra></extra>")
     })

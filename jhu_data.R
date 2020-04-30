@@ -145,6 +145,9 @@ covid_cases_usa <- covid_cases_usa %>% group_by(State) %>% mutate(NewDeaths = De
 # merge with statestats
 covid_cases_usa <- merge(covid_cases_usa, statestats, by = c("State"), all = TRUE)
 
+# transform NewCases variable to per 100,000 people scale
+covid_cases_usa$NewCases <- (covid_cases_usa$NewCases/covid_cases_usa$Population)*100000
+
 # add Totalper100_000 variable
 covid_cases_usa$Totalper100_000 <- (covid_cases_usa$Total/covid_cases_usa$Population)*100000
 
@@ -223,7 +226,7 @@ middlestates[22:32,]
 states[with(states, order(Total)), ]
 
 # restructuring for app
-covid_cases_usa <- select(covid_cases_usa, -DayCount, -NewCases, -NewDeaths, -atlNegativeTests, -atlRecoveries, -atlDayCount)
+covid_cases_usa <- select(covid_cases_usa, -DayCount, -NewDeaths, -atlNegativeTests, -atlRecoveries, -atlDayCount)
 
 # write csv
 write.csv(covid_cases_usa, "covid_cases_usa.csv", row.names = FALSE)
