@@ -355,7 +355,7 @@ server <- function(input, output, session) {
     pickerInput(
       inputId = "statesinput", label = h5("Select states to include in plot"),
       choices = stateslist,
-      selected = stateslist,
+      selected = c("New York", "New Jersey", "Michigan", "Florida", "Washington", "California"),
       multiple = TRUE,
       options = list(`actions-box` = TRUE)
     )
