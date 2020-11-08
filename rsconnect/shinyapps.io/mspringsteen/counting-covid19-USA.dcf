@@ -5,8 +5,8 @@ account: mspringsteen
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 2082165
-bundleId: 3212195
+bundleId: 3760654
 url: https://mspringsteen.shinyapps.io/counting-covid19-USA/
-when: 1590972377.15903
+when: 1603159931.11137
 asMultiple: FALSE
 asStatic: FALSE

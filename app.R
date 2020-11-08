@@ -22,7 +22,7 @@ if(!require(rintrojs)) install.packages("rintrojs", repos = "http://cran.us.r-pr
 if(!require(scales)) install.packages("scales", repos = "http://cran.us.r-project.org")
 
 # update data to be used
-#source("jhu_data.R")
+source("jhu_data.R")
 
 # import data
 covid_cases <- read.csv("covid_cases_usa.csv")
@@ -31,6 +31,7 @@ covid_cases$Cases_actual <- (covid_cases$Cases/100000)*covid_cases$Population
 covid_cases$Tests <- covid_cases$atlTestsper100_000
 covid_cases$Tests_actual <- (covid_cases$Tests/100000)*covid_cases$Population
 covid_cases$NewCases_actual <- (covid_cases$NewCases/100000)*covid_cases$Population
+covid_cases$Smoothed_per <- (covid_cases$Smoothed/covid_cases$Population)*100000
 
 # Shiny ui
 ui <- dashboardPage(
@@ -355,14 +356,14 @@ server <- function(input, output, session) {
     pickerInput(
       inputId = "statesinput", label = h5("Select states to include in plot"),
       choices = stateslist,
-      selected = c("New York", "New Jersey", "Michigan", "Florida", "Washington", "California"),
+      selected = c("New York", "New Jersey", "Michigan", "Florida", "Washington", "California", "Arizona", "South Carolina", "Mississippi", "Utah", "Akansas", "Alabama", "North Carolina", "Florida", "Iowa", "Texas", "Nevada", "Tennessee", "Georgia", "Louisiana"),
       multiple = TRUE,
       options = list(`actions-box` = TRUE)
     )
   })
   # create minimal dataset
   min_covid_case <- reactive({
-    select(covid_cases, State, Date, Day, Tests, Cases, DeathRate, Measure, NewCases, Cases_actual, Tests_actual, NewCases_actual) %>%
+    select(covid_cases, State, Date, Day, Tests, Cases, DeathRate, Measure, NewCases, Smoothed, Cases_actual, Tests_actual, NewCases_actual, Smoothed_per) %>%
       filter(State %in% input$statesinput)
   })
   # enable inputs if variable is checked
@@ -682,7 +683,7 @@ server <- function(input, output, session) {
     popdensfilter <- quote(between(Pop_psqMile, as.numeric(input$popdensinput[1]), as.numeric(input$popdensinput[2])))
     covid_cases %>%
       select(
-        State, Date, Day, Tests, Cases, DeathRate, Measure, NewCases, Cases_actual, Tests_actual, NewCases_actual,
+        State, Date, Day, Tests, Cases, DeathRate, Measure, NewCases, Smoothed, Cases_actual, Tests_actual, NewCases_actual, Smoothed_per,
         if (input$popcheck == FALSE) {"State"} else {"Population_hundthou"},
         if (input$agecheck == FALSE) {"State"} else {"Age"},
         if (input$hscheck == FALSE) {"State"} else {"HSgrad"},
@@ -722,23 +723,23 @@ server <- function(input, output, session) {
       with_options(list(digits = 1),
                    ggplotly(
                      ggplot(selected_covid_case()) +
-                       geom_line(data = min_covid_case(), aes(x = Day, y = NewCases, group = State,
-                                                              text = paste(State, "<br>Day: ", Day, "<br>New Cases (scaled): ", round(NewCases, digits = 1), "<br>New Cases (actual): ", round(NewCases_actual, digits = 1))), color = "#bdc3c7", show.legend = FALSE) +
-                       geom_line(aes(x = Day, y = NewCases, color = State, group = State,
-                                     text = paste(State, "<br>Day: ", Day, "<br>New Cases (scaled): ", round(NewCases, digits = 1), "<br>New Cases (actual): ", round(NewCases_actual, digits = 1))), show.legend = FALSE) +
-                       geom_smooth(aes(x = Day, y = NewCases), data = min_covid_case(),
+                       geom_line(data = min_covid_case(), aes(x = Day, y = Smoothed_per, group = State,
+                                                              text = paste(State, "<br>Day: ", Day, "<br>New Cases (scaled): ", round(Smoothed_per, digits = 1), "<br>New Cases (actual): ", round(NewCases_actual, digits = 1))), color = "#bdc3c7", show.legend = FALSE) +
+                       geom_line(aes(x = Day, y = Smoothed_per, color = State, group = State,
+                                     text = paste(State, "<br>Day: ", Day, "<br>New Cases (scaled): ", round(Smoothed_per, digits = 1), "<br>New Cases (actual): ", round(NewCases_actual, digits = 1))), show.legend = FALSE) +
+                       geom_smooth(aes(x = Day, y = Smoothed_per), data = min_covid_case(),
                                    method = "loess", se = FALSE, color = "#bdc3c7", size = .5, alpha = .6, linetype = "dotted") +
-                       geom_ribbon(aes(x = Day, y = NewCases), data = min_covid_case(),
+                       geom_ribbon(aes(x = Day, y = Smoothed_per), data = min_covid_case(),
                                    stat = "smooth", method = "loess", alpha = .15) +
-                       geom_smooth(aes(x = Day, y = NewCases),
+                       geom_smooth(aes(x = Day, y = Smoothed_per),
                                    method = "loess", se = FALSE, color = "#3c8dbc", size = .5, alpha = .6, linetype = "dotted") +
-                       geom_ribbon(aes(x = Day, y = NewCases),
+                       geom_ribbon(aes(x = Day, y = Smoothed_per),
                                    stat = "smooth", method = "loess", alpha = .15) +
                        labs(
                          title = "New confirmed Covid-19 cases ('The Curve')",
-                         x = "Days from 50th in-state case", y = "New cases per 100,000 people") +
+                         x = "Days from 50th in-state case", y = "New cases per 100,000 people (7 day average)") +
                        scale_x_continuous(expand = c(0, 0)) +
-                       scale_y_log10(expand = c(0, 0)) +
+                       scale_y_continuous(expand = c(0, 0)) +
                        theme(text = element_text(family = "Georgia"),
                              panel.background = element_rect(fill = "#f7f5f0", colour = "#f7f5f0"),
                              plot.title = element_text(face = "italic"),
@@ -760,10 +761,7 @@ server <- function(input, output, session) {
   output$newcases_plot <- renderPlotly({
     input$updategraph
     isolate({
-      newcases_plot() %>% add_trace(data = subset(selected_covid_case(), !is.na(Measure)), y = ~log10(NewCases), x = ~Day,
-                                 text = ~paste(State, "<br>Day: ", Day, "<br>New Cases (scaled): ", round(NewCases, digits = 1), "<br>New Cases (actual): ", round(NewCases_actual, digits = 1), "<br>Policies enacted today: ", "<br>", Measure),
-                                 color = I("#575D61"), mode = "markers", alpha = .7, marker = list(size = 7), showlegend = FALSE,
-                                 hovertemplate = "%{text}<extra></extra>")
+      newcases_plot()
     })
   })
   output$newcases_graph <- renderUI({
@@ -797,8 +795,8 @@ server <- function(input, output, session) {
                       method = "loess", se = FALSE, color = "#3c8dbc", size = .5, alpha = .6, linetype = "dotted") +
           geom_ribbon(aes(x = Tests, y = Cases),
                       stat = "smooth", method = "loess", alpha = .15) +
-          scale_x_log10(expand = c(0, 0)) +
-          scale_y_log10(expand = c(0, 0)) +
+          scale_x_continuous(expand = c(0, 0)) +
+          scale_y_continuous(expand = c(0, 0)) +
           labs(
             title = "Covid-19 testing by confirmed infections",
             x = "Tests performed per 100,000 people", y = "Detected cases per 100,000 people") +
@@ -823,10 +821,7 @@ server <- function(input, output, session) {
   output$tests_plot <- renderPlotly({
     input$updategraph
     isolate({
-      tests_plot() %>% add_trace(data = subset(selected_covid_case(), !is.na(Measure)), y = ~log10(Cases), x = ~log10(Tests),
-                                 text = ~paste(State, "<br>Day: ", Day, "<br>Tests (scaled): ", round(Tests, digits = 1), "<br>Tests (actual): ", round(Tests_actual, digits = 1), "<br>Cases (scaled): ", round(Cases, digits = 1), "<br>Cases (actual): ", round(Cases_actual, digits = 1), "<br>Policies enacted today: ", "<br>", Measure),
-                                 color = I("#575D61"), mode = "markers", alpha = .7, marker = list(size = 7), showlegend = FALSE,
-                                 hovertemplate = "%{text}<extra></extra>")
+      tests_plot()
     })
   })
   output$tests_graph <- renderUI({
@@ -862,7 +857,7 @@ server <- function(input, output, session) {
         title = "Confirmed Covid-19 cases",
         x = "Days from 50th in-state case", y = "Detected cases per 100,000 people") +
       scale_x_continuous(expand = c(0, 0)) +
-      scale_y_log10(expand = c(0, 0)) +
+      scale_y_continuous(expand = c(0, 0)) +
       theme(text = element_text(family = "Georgia"),
         panel.background = element_rect(fill = "#f7f5f0", colour = "#f7f5f0"),
         plot.title = element_text(face = "italic"),
@@ -884,10 +879,7 @@ server <- function(input, output, session) {
   output$cases_plot <- renderPlotly({
     input$updategraph
     isolate({
-      cases_plot() %>% add_trace(data = subset(selected_covid_case(), !is.na(Measure)), y = ~log10(Cases), x = ~Day,
-                                 text = ~paste(State, "<br>Day: ", Day, "<br>Cases (scaled): ", round(Cases, digits = 1), "<br>Cases (actual): ", round(Cases_actual, digits = 1), "<br>Policies enacted today: ", "<br>", Measure),
-                                 color = I("#575D61"), mode = "markers", alpha = .7, marker = list(size = 7), showlegend = FALSE,
-                                 hovertemplate = "%{text}<extra></extra>")
+      cases_plot()
     })
   })
   output$cases_graph <- renderUI({
@@ -946,10 +938,7 @@ server <- function(input, output, session) {
   output$case_fatality_plot <- renderPlotly({
     input$updategraph
     isolate({
-      case_fatality_plot() %>% add_trace(data = subset(selected_covid_case(), !is.na(Measure)), y = ~DeathRate, x = ~Day,
-                                         text = ~paste(State, "<br>Day: ", Day, "<br>Death Rate: ", paste(round(100*DeathRate, 2), "%", sep = ""),  "<br>Policies enacted today: ", "<br>", Measure),
-                                         color = I("#575D61"), mode = "markers", alpha = .7, marker = list(size = 7), showlegend = FALSE,
-                                         hovertemplate = "%{text}<extra></extra>")
+      case_fatality_plot()
     })
   })
   output$case_fatality_graph <- renderUI({

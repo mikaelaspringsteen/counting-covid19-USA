@@ -14,13 +14,15 @@ deaths <- as.data.frame(data.table::fread("https://raw.githubusercontent.com/CSS
 # The Atlantic (The COVID Tracking Project)
 atl <- as.data.frame(data.table::fread("https://covidtracking.com/api/v1/states/daily.csv"))
 # coronanet data
-coronanet <- as.data.frame(data.table::fread("https://raw.githubusercontent.com/saudiwin/corona_tscs/master/data/CoronaNet/coronanet_release.csv"))
+#coronanet <- as.data.frame(data.table::fread("https://raw.githubusercontent.com/saudiwin/corona_tscs/master/data/CoronaNet/coronanet_release.csv"))
+coronanet <- read_csv("data/coronanet_release.csv")
+
 # state / country stats
 statestats <- read.csv("statestats.csv")
 
 # coronanet
 # select, rename coronanet variables
-coronanet <- select(coronanet, -date_announced, -date_end, -type_text, -source_file_Type, -target_direction, -travel_mechanism, -compliance, -enforcer, -ISO_A3, -ISO_A2, -link_type, -target_country, -target_geog_level, -target_region, -target_province, -target_city, -target_other, -target_who_what, -index_high_est, -index_med_est, -index_low_est, -index_country_rank, -domestic_policy, -type_num_vaccines)
+coronanet <- select(coronanet, -date_announced, -date_end, -type_text, -target_direction, -travel_mechanism, -compliance, -enforcer, -ISO_A3, -ISO_A2, -target_country, -target_geog_level, -target_region, -target_province, -target_city, -target_other, -target_who_what, -index_high_est, -index_med_est, -index_low_est, -index_country_rank, -domestic_policy)
 coronanet$type[coronanet$type == "Restriction of Non-Essential Businesses"] <- "Restrict businesses"
 coronanet$type[coronanet$type == "Restriction of Non-Essential Government Services"] <- "Restrict gov. services"
 coronanet$type[coronanet$type == "Closure of Schools"] <- "School closure"
@@ -139,6 +141,34 @@ coronanet$type_sub_cat[coronanet$type_sub_cat == "Unspecified outdoor spaces"] <
 coronanet$type_sub_cat[coronanet$type_sub_cat == "Unspecified public facilities"] <- " (unspecified public facilities)"
 coronanet$type_sub_cat[coronanet$type_sub_cat == "Visa extensions (e.g. visa validity extended)"] <- " (visa extensions)"
 coronanet$type_sub_cat[coronanet$type_sub_cat == "Warehousing and support activities for transportation"] <- " (warehouse/support for transport)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Lockdown only applies to people of certain ages (Please note the age restriction in the text box)"] <- " (lockdown for certain ages)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Lockdown only applies to people with a condition not specified above (Please note the 'other' condition in the text entry)"] <- " (lockdown for people with another condition)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Lockdown only applies to people with certain health conditions (Please note the health conditions in the text box)"] <- " (lockdown for those with certain health conditions)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Agriculture; forestry and fishing"] <- " (agriculture, forestry, fishing)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Annually recurring event allowed to occur with certain conditions"] <- " (annual events conditionally permitted)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Attendance at religious services restricted (e.g. mosque/church closings)"] <- " (religious attendance restricted)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Bars"] <- " (bars)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Cooperation among different jurisdictional entities (e.g. treaties or agreements among countries or provinces)"] <- " (inter-jurisdictional cooperation)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Election procedures (e.g. mail-in voting)"] <- " (election procedures)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Events at private residencies restricted (e.g. parties held at home)"] <- " (events at private residencies restricted)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Financial service activities except insurance and pension funding"] <- " (financial services, except insurance/pensions)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Higher education institutions (i.e. degree granting institutions)"] <- " (higher ed. institutions)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Insurance; reinsurance; and pension funding except compulsory social security"] <- " (insurance, reinsurance, pensions except social security)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Keeping a distance of at least 6 feet or 1.5 meters apart"] <- " (maintain 6ft/1.5m distance)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Private health offices"] <- " (private health offices)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Regulated hours government services available (e.g. government services office open for certain hours only)"] <- " (gov. services available at certain hours)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Regulations on publicly provided waste management services"] <- " (public waste management regulations)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Restaurants"] <- " (restaurants)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Restrictions on  private vehicles in public circulation"] <- " (private vehicle restrictions)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Restrictions on ridership of buses"] <- " (bus restrictions)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Restrictions on ridership of subways and trams"] <- " (subway/tram restrictions)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Restrictions on ridership of trains"] <- " (train restrictions)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Restrictions ridership of other forms of public transportation (please include details in the text entry)"] <- " (public transport restrictions)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Transportation (land; water and air)"] <- " (transportation)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Water supply; sewerage; waste management and remediation activities"] <- " (water supply, sewage, waste management)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Wearing Masks in all public spaces/everywhere"] <- " (wearing masks in public)"
+coronanet$type_sub_cat[coronanet$type_sub_cat == "Wearing Masks inside public or commercial building"] <- " (wearing masks in buildings)"
+
 coronanet$type_sub_cat[is.na(coronanet$type_sub_cat)] <- ""
 coronanet$Measure <- paste0(coronanet$type, coronanet$type_sub_cat)
 coronanet <- select(coronanet, date_start, country, province, init_country_level, link, Measure)
@@ -195,6 +225,7 @@ covid_cases_usa <- lapply(covid_cases_usa, function(df) {
 covid_cases_usa <- covid_cases_usa %>% reduce(left_join, by = c("Date", "State"))
 
 # merge covid_cases and coronanet on State and Date
+coronanet$State[coronanet$State == "Washington, D.C."] <- "District of Columbia"
 covid_cases_usa <- merge(covid_cases_usa, coronanet, by = c("State", "Date"), all = TRUE)
 
 # add DayCount variable
@@ -206,6 +237,67 @@ covid_cases_usa <- merge(covid_cases_usa, Day_dat, all = TRUE)
 
 # add NewCases variable
 covid_cases_usa <- covid_cases_usa %>% group_by(State) %>% mutate(NewCases = Total - lag(Total, default = first(Total)))
+
+# smooth over 7 days
+movingAverage <- function(x, n=1, centered=FALSE) {
+
+  if (centered) {
+    before <- floor  ((n-1)/2)
+    after  <- ceiling((n-1)/2)
+  } else {
+    before <- n-1
+    after  <- 0
+  }
+
+  # Track the sum and count of number of non-NA items
+  s     <- rep(0, length(x))
+  count <- rep(0, length(x))
+
+  # Add the centered data
+  new <- x
+  # Add to count list wherever there isn't a
+  count <- count + !is.na(new)
+  # Now replace NA_s with 0_s and add to total
+  new[is.na(new)] <- 0
+  s <- s + new
+
+  # Add the data from before
+  i <- 1
+  while (i <= before) {
+    # This is the vector with offset values to add
+    new   <- c(rep(NA, i), x[1:(length(x)-i)])
+
+    count <- count + !is.na(new)
+    new[is.na(new)] <- 0
+    s <- s + new
+
+    i <- i+1
+  }
+
+  # Add the data from after
+  i <- 1
+  while (i <= after) {
+    # This is the vector with offset values to add
+    new   <- c(x[(i+1):length(x)], rep(NA, i))
+
+    count <- count + !is.na(new)
+    new[is.na(new)] <- 0
+    s <- s + new
+
+    i <- i+1
+  }
+
+  # return sum divided by count
+  s/count
+}
+test <- covid_cases_usa
+test <- group_split(test)
+test <- lapply(test, function(df) {
+  df$Smoothed <- movingAverage(df$NewCases, 7, TRUE)
+  df
+})
+test <- bind_rows(test)
+covid_cases_usa <- test
 
 # add NewDeaths variable
 covid_cases_usa <- covid_cases_usa %>% group_by(State) %>% mutate(NewDeaths = Deaths - lag(Deaths, default = first(Deaths)))
